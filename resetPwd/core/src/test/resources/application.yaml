@@ -1,0 +1,7 @@
+application:
+  name: core
+  package: me.xethh.lib.extension.core
+spring:
+  application:
+    name: ${application.name}
+
