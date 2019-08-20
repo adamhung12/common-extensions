@@ -1,0 +1,8 @@
+application:
+  name: core
+  package: me.xethh.libs.extension.swt.core
+spring:
+  application:
+    name: ${application.name}
+sst-core:
+  app-name: Default
