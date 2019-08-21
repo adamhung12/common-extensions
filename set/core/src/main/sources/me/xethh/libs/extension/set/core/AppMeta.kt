@@ -16,11 +16,11 @@ import javax.annotation.PostConstruct
 @Target(AnnotationTarget.CLASS)
 annotation class EnableSETCore
 
-@EnableConfigurationProperties(SSTCoreConfigProperties::class)
+@EnableConfigurationProperties(SETCoreConfigProperties::class)
 open class SETCoreConfig : WithLogger{
     @Bean
     open fun appNameProvider(): AppNameProvider {
-        return when (sstCoreConfigProperties.appName.type!!) {
+        return when (SETCoreConfigProperties.appName.type!!) {
             AppNameConfig.BuildType.Default -> DefaultAppNameProvider()
             AppNameConfig.BuildType.None -> NoneAppNameProvider()
             AppNameConfig.BuildType.Custom -> throw RuntimeException("app name provider not supported")
@@ -32,7 +32,7 @@ open class SETCoreConfig : WithLogger{
         return AppMeta()
     }
 
-    @Autowired lateinit var sstCoreConfigProperties: SSTCoreConfigProperties
+    @Autowired lateinit var SETCoreConfigProperties: SETCoreConfigProperties
     @Autowired lateinit var appMeta: AppMeta
     @Autowired lateinit var appNameProvider: AppNameProvider
 
@@ -47,7 +47,7 @@ open class SETCoreConfig : WithLogger{
 }
 
 @ConfigurationProperties(prefix = "set-core")
-class SSTCoreConfigProperties{
+class SETCoreConfigProperties{
     var appName: AppNameConfig = AppNameConfig.default()
 }
 
