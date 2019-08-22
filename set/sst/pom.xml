@@ -121,6 +121,11 @@
       <version>${kotlin.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>me.xethh.libs.toolkits.webDto</groupId>
+      <artifactId>core</artifactId>
+      <version>0.9.0-BETA</version>
+    </dependency>
   </dependencies>
   <dependencyManagement>
 

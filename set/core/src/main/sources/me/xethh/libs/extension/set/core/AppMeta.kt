@@ -1,12 +1,16 @@
 package me.xethh.libs.extension.set.core
 
+import me.xethh.libs.extension.set.core.idProvider.MachineBasedProvider
+import me.xethh.libs.extension.set.core.idProvider.TimeBasedProvider
 import me.xethh.libs.extension.set.core.appProvider.AppNameProvider
 import me.xethh.libs.extension.set.core.appProvider.DefaultAppNameProvider
 import me.xethh.libs.extension.set.core.appProvider.NoneAppNameProvider
+import me.xethh.libs.extension.set.core.idProvider.IdProvider
 import me.xethh.libs.toolkits.logging.WithLogger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.context.properties.NestedConfigurationProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import javax.annotation.PostConstruct
@@ -32,31 +36,65 @@ open class SETCoreConfig : WithLogger{
         return AppMeta()
     }
 
+    @Bean
+    open fun idProvider(@Autowired appMeta:AppMeta): IdProvider {
+        return when (SETCoreConfigProperties.idProvider.type!!){
+            IdProviderConfig.ProviderType.MachineBase -> {
+                val mbp = MachineBasedProvider()
+                mbp.serviceId = appMeta.appNameProvider.gen()
+                mbp
+            }
+            IdProviderConfig.ProviderType.TimeBase -> TimeBasedProvider()
+            IdProviderConfig.ProviderType.Custom -> throw RuntimeException("Custom id provider not supported")
+        }
+    }
+
     @Autowired lateinit var SETCoreConfigProperties: SETCoreConfigProperties
     @Autowired lateinit var appMeta: AppMeta
     @Autowired lateinit var appNameProvider: AppNameProvider
+//    @Autowired lateinit var idProvider: IdProvider
 
     @PostConstruct
     fun init(){
         logger().info("-------------------------------")
         logger().info("Init SET complete")
         logger().info("AppName: ${appMeta.appNameProvider.gen()}")
+//        logger().info("Id Provider Name: ${idProvider.javaClass.simpleName}")
         logger().info("-------------------------------")
     }
 
 }
 
-@ConfigurationProperties(prefix = "set-core")
+@ConfigurationProperties(prefix = "set-core", ignoreUnknownFields = true)
 class SETCoreConfigProperties{
-    var appName: AppNameConfig = AppNameConfig.default()
+    @NestedConfigurationProperty
+    var appName: AppNameConfig = AppNameConfig()
+    @NestedConfigurationProperty
+    var idProvider : IdProviderConfig = IdProviderConfig()
 }
 
 class AppMeta : WithLogger {
     @Autowired lateinit var appNameProvider: AppNameProvider
 }
 
+class IdProviderConfig{
+    var type:ProviderType
+    constructor(){
+        this.type = ProviderType.MachineBase
+    }
+    constructor(typeStr:String){
+        this.type = ProviderType.valueOf(typeStr)
+    }
+    constructor(type:ProviderType){
+        this.type = type
+    }
+    enum class ProviderType{
+        MachineBase, TimeBase, Custom
+    }
+
+}
 class AppNameConfig{
-    lateinit var type: BuildType
+    var type: BuildType
     constructor(){
         type= BuildType.None
     }
