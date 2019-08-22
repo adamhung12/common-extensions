@@ -6,11 +6,11 @@
 
   <parent>
     <artifactId>resetPwd</artifactId>
-    <groupId>me.xethh.libs.extension</groupId>
+    <groupId>me.xethh.libs.extensions</groupId>
     <version>1.0.0</version>
   </parent>
 
-  <groupId>me.xethh.libs.extension.resetPwd</groupId>
+  <groupId>me.xethh.libs.extensions.resetPwd</groupId>
   <artifactId>core</artifactId>
   <version>1.0.0</version>
 
