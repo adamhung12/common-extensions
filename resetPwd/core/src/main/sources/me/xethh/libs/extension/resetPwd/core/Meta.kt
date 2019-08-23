@@ -1,46 +1,26 @@
 package me.xethh.libs.extension.resetPwd.core
 
-open class SystemMeta(val systemCode:String, val systemName:String, val description : String){
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+import me.xethh.libs.toolkits.sysMeta.ModuleMeta
+import me.xethh.libs.toolkits.sysMeta.SystemMeta
+import me.xethh.libs.toolkits.webDto.core.response.err.BaseError
+import me.xethh.libs.toolkits.webDto.core.response.err.BaseErrorException
 
-        other as SystemMeta
-
-        if (systemCode != other.systemCode) return false
-        if (systemName != other.systemName) return false
-        if (description != other.description) return false
-
-        return true
+class RPSys: SystemMeta("RP","ResetPwd", "System for reset password")
+open class PasswordResetError(errorCode: String, errMessage: String, inputs: Array<String>) : BaseError(ForgetPasswordModule.SELF, errorCode, errMessage, inputs){
+    fun toException() : BaseErrorException {
+        return BaseErrorException(this)
     }
-
-    override fun hashCode(): Int {
-        var result = systemCode.hashCode()
-        result = 31 * result + systemName.hashCode()
-        result = 31 * result + description.hashCode()
-        return result
-    }
+    class NoBaseError(): PasswordResetError("","",arrayOf())
 }
-open class ModuleMeta(val moudleCode:String, val moduleName:String, val description : String , val systemMeta: SystemMeta){
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ModuleMeta
-
-        if (moudleCode != other.moudleCode) return false
-        if (moduleName != other.moduleName) return false
-        if (description != other.description) return false
-        if (systemMeta != other.systemMeta) return false
-
-        return true
+class ForgetPasswordModule : ModuleMeta("FP","Forgot Password", "Forget password module", RPSys()){
+    companion object{
+        val SELF = ForgetPasswordModule()
     }
+    class RequestClaimedRequest(array:Array<String>) : PasswordResetError("00001", "The request is already claimed",array)
+    class RequestTimeoutRequest(array:Array<String>) : PasswordResetError("00002", "The request is already timeout",array)
+    class RequestNotFoundRequest(array:Array<String>) : PasswordResetError( "00003", "The request does not found",array)
+    class RequestMetaDataNotMatch(array:Array<String>) : PasswordResetError( "00004", "The request meta data not match",array)
+    class RequestResetFailed(array:Array<String>) : PasswordResetError( "00005", "The reset process is failed",array)
 
-    override fun hashCode(): Int {
-        var result = moudleCode.hashCode()
-        result = 31 * result + moduleName.hashCode()
-        result = 31 * result + description.hashCode()
-        result = 31 * result + systemMeta.hashCode()
-        return result
-    }
 }
+

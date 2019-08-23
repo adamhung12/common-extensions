@@ -97,6 +97,11 @@
     <!-- Spring boot dependencies start-->
 
     <dependency>
+      <groupId>me.xethh.libs.toolkits</groupId>
+      <artifactId>commons</artifactId>
+      <version>1.8-RELEASE</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
