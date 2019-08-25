@@ -112,7 +112,7 @@
     <dependency>
       <groupId>me.xethh.libs.toolkits.webDto</groupId>
       <artifactId>core</artifactId>
-      <version>0.9.0-BETA</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
@@ -139,6 +139,7 @@
   <dependencyManagement>
 
   </dependencyManagement>
+
 
   <build>
     <sourceDirectory>src/main/sources</sourceDirectory>
@@ -242,6 +243,8 @@
             <phase>verify</phase>
             <goals><goal>sign</goal></goals>
             <configuration>
+              <keyname>${gpg.keyname}</keyname>
+              <passphraseServerId>${gpg.keyname}</passphraseServerId>
               <gpgArguments>
                 <arg>--pinentry-mode</arg>
                 <arg>loopback</arg>
