@@ -18,7 +18,7 @@
   <artifactId>set</artifactId>
   <version>1.0.0</version>
 
-  <name>swt</name>
+  <name>set</name>
   <packaging>pom</packaging>
 
   <licenses>
