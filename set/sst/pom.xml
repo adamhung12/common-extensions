@@ -12,7 +12,7 @@
 
   <groupId>me.xethh.libs.extension.set.sst</groupId>
   <artifactId>core</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 
   <name>sst</name>
 
@@ -96,6 +96,11 @@
       <groupId>me.xethh.utils</groupId>
       <artifactId>DateUtils</artifactId>
     </dependency>
+    <dependency>
+      <groupId>me.xethh.libs.toolkits</groupId>
+      <artifactId>commons</artifactId>
+      <version>1.9-RELEASE</version>
+    </dependency>
     <!-- Spring boot dependencies start-->
 
     <dependency>
@@ -124,7 +129,12 @@
     <dependency>
       <groupId>me.xethh.libs.toolkits.webDto</groupId>
       <artifactId>core</artifactId>
-      <version>0.9.0-BETA</version>
+      <version>1.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>1.8.9</version>
     </dependency>
   </dependencies>
   <dependencyManagement>
