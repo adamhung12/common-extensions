@@ -1,5 +1,6 @@
 package me.xethh.libs.extension.set.sst.core.FirstLayerFilter.requestResponsePreprocess;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import me.xethh.libs.toolkits.aspectInterface.Aspect;
 import me.xethh.libs.toolkits.webDto.core.MetaEntity;
 import me.xethh.libs.toolkits.webDto.core.request.Request;
@@ -10,19 +11,31 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Annotation;
 import java.util.Date;
 
 public abstract class WebDtosAspect extends Aspect {
     @Autowired
     private HttpServletRequest httpServletRequest;
+    ObjectMapper objectMapper = new ObjectMapper();
     @Override
     public Object executeTask(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object processResult = null;
         if(joinPoint.getSignature() instanceof MethodSignature){
             MethodSignature signature = (MethodSignature) joinPoint.getSignature();
             Object[] args = joinPoint.getArgs();
             Class[] paramTypes = signature.getParameterTypes();
+            Annotation[][] annotationTypes = signature.getMethod().getParameterAnnotations();
+
             MetaEntity meta = metaSetup();
+
             for(int i=0;i<paramTypes.length;i++){
+                if("get".equalsIgnoreCase(httpServletRequest.getMethod()) && annotations(i, GetRequestBody.class, annotationTypes)!=null){
+                    GetRequestBody annotation = annotations(i, GetRequestBody.class, annotationTypes);
+                    String requestString = httpServletRequest.getParameter(annotation.value());
+                    Object obj = objectMapper.readValue(requestString, paramTypes[i]);
+                    args[i] = obj;
+                }
                 if(Request.class.isAssignableFrom(paramTypes[i]) && args[i]!=null){
                     ((Request)args[i]).setId(MDC.get(MetaEntity.HEADER.REQUEST_ID_HEADER));
                     ((Request)args[i]).setMeta(meta);
@@ -38,11 +51,23 @@ public abstract class WebDtosAspect extends Aspect {
                     ((Response) args[i]).setMeta(meta);
                 }
             }
+            processResult = joinPoint.proceed(args);
         }
-        Object obj = joinPoint.proceed();
-        if(obj!=null && obj instanceof Response)
-            ((Response) obj).getMeta().setEnd(new Date());
-        return obj;
+        else
+            processResult = joinPoint.proceed();
+
+        if(processResult!=null && processResult instanceof Response)
+            ((Response) processResult).getMeta().setEnd(new Date());
+        return processResult;
+    }
+
+    public <A extends Annotation> A annotations(Integer index, Class<A> clazz, Annotation[][] annotations){
+        for(int i=0; i<annotations[index].length;i++){
+            if(clazz.isAssignableFrom(annotations[index][i].getClass())){
+                return (A)annotations[index][i];
+            }
+        }
+        return null;
     }
 
     public MetaEntity metaSetup(){
