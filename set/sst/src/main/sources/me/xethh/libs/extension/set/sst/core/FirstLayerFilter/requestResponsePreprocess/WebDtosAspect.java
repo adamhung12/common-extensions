@@ -3,8 +3,10 @@ package me.xethh.libs.extension.set.sst.core.FirstLayerFilter.requestResponsePre
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.xethh.libs.toolkits.aspectInterface.Aspect;
 import me.xethh.libs.toolkits.webDto.core.MetaEntity;
+import me.xethh.libs.toolkits.webDto.core.WebBaseEntity;
 import me.xethh.libs.toolkits.webDto.core.request.Request;
 import me.xethh.libs.toolkits.webDto.core.response.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.MDC;
@@ -32,23 +34,23 @@ public abstract class WebDtosAspect extends Aspect {
             for(int i=0;i<paramTypes.length;i++){
                 if("get".equalsIgnoreCase(httpServletRequest.getMethod()) && annotations(i, GetRequestBody.class, annotationTypes)!=null){
                     GetRequestBody annotation = annotations(i, GetRequestBody.class, annotationTypes);
-                    String requestString = httpServletRequest.getParameter(annotation.value());
-                    Object obj = objectMapper.readValue(requestString, paramTypes[i]);
-                    args[i] = obj;
-                }
-                if(Request.class.isAssignableFrom(paramTypes[i]) && args[i]!=null){
-                    ((Request)args[i]).setId(MDC.get(MetaEntity.HEADER.REQUEST_ID_HEADER));
-                    ((Request)args[i]).setMeta(meta);
-                }
-                if(Response.class.isAssignableFrom(paramTypes[i])){
-                    if(args[i]==null){
-                        Response response = (Response) paramTypes[i].getConstructor().newInstance();
-                        response.setId(MDC.get(MetaEntity.HEADER.REQUEST_ID_HEADER));
+                    if(StringUtils.isNotEmpty(httpServletRequest.getParameter(annotation.value()))){
+                        String requestString = httpServletRequest.getParameter(annotation.value());
+                        Object obj = objectMapper.readValue(requestString, paramTypes[i]);
+                        args[i] = obj;
                     }
-                    else {
+                }
+                if(args[i]!=null){
+                    if(Request.class.isAssignableFrom(paramTypes[i])){
+                        ((Request)args[i]).setId(MDC.get(MetaEntity.HEADER.REQUEST_ID_HEADER));
+                    }
+                    if(Response.class.isAssignableFrom(paramTypes[i])){
+                        if(args[i]==null)
+                            args[i] = paramTypes[i].getConstructor().newInstance();
                         ((Response) args[i]).setId(MDC.get(MetaEntity.HEADER.REQUEST_ID_HEADER));
                     }
-                    ((Response) args[i]).setMeta(meta);
+                    if(WebBaseEntity.class.isAssignableFrom(paramTypes[i]))
+                        ((WebBaseEntity) args[i]).setMeta(meta);
                 }
             }
             processResult = joinPoint.proceed(args);
@@ -56,7 +58,10 @@ public abstract class WebDtosAspect extends Aspect {
         else
             processResult = joinPoint.proceed();
 
-        if(processResult!=null && processResult instanceof Response)
+        if(processResult!=null
+                && processResult instanceof Response
+                && ((Response) processResult).getMeta()!=null
+        )
             ((Response) processResult).getMeta().setEnd(new Date());
         return processResult;
     }
