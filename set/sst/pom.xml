@@ -12,7 +12,7 @@
 
   <groupId>me.xethh.libs.extension.set.sst</groupId>
   <artifactId>core</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.5</version>
 
   <name>sst</name>
 
@@ -85,7 +85,7 @@
     <dependency>
       <groupId>me.xethh.libs.extension.set</groupId>
       <artifactId>core</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -129,7 +129,7 @@
     <dependency>
       <groupId>me.xethh.libs.toolkits.webDto</groupId>
       <artifactId>core</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>org.aspectj</groupId>

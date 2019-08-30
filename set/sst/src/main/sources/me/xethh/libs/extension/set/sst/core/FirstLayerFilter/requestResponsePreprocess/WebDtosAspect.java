@@ -1,6 +1,7 @@
 package me.xethh.libs.extension.set.sst.core.FirstLayerFilter.requestResponsePreprocess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.xethh.libs.extension.set.core.RequestMeta;
 import me.xethh.libs.toolkits.aspectInterface.Aspect;
 import me.xethh.libs.toolkits.webDto.core.MetaEntity;
 import me.xethh.libs.toolkits.webDto.core.WebBaseEntity;
@@ -20,6 +21,10 @@ public abstract class WebDtosAspect extends Aspect {
     @Autowired
     private HttpServletRequest httpServletRequest;
     ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    RequestMeta requestMeta;
+
     @Override
     public Object executeTask(ProceedingJoinPoint joinPoint) throws Throwable {
         Object processResult = null;
@@ -29,7 +34,7 @@ public abstract class WebDtosAspect extends Aspect {
             Class[] paramTypes = signature.getParameterTypes();
             Annotation[][] annotationTypes = signature.getMethod().getParameterAnnotations();
 
-            MetaEntity meta = metaSetup();
+            MetaEntity meta = requestMeta.getMetaEntity();
 
             for(int i=0;i<paramTypes.length;i++){
                 if("get".equalsIgnoreCase(httpServletRequest.getMethod()) && annotations(i, GetRequestBody.class, annotationTypes)!=null){
@@ -42,12 +47,12 @@ public abstract class WebDtosAspect extends Aspect {
                 }
                 if(args[i]!=null){
                     if(Request.class.isAssignableFrom(paramTypes[i])){
-                        ((Request)args[i]).setId(MDC.get(MetaEntity.HEADER.REQUEST_ID_HEADER));
+                        ((Request)args[i]).setId(requestMeta.getId());
                     }
                     if(Response.class.isAssignableFrom(paramTypes[i])){
                         if(args[i]==null)
                             args[i] = paramTypes[i].getConstructor().newInstance();
-                        ((Response) args[i]).setId(MDC.get(MetaEntity.HEADER.REQUEST_ID_HEADER));
+                        ((Response) args[i]).setId(requestMeta.getId());
                     }
                     if(WebBaseEntity.class.isAssignableFrom(paramTypes[i]))
                         ((WebBaseEntity) args[i]).setMeta(meta);
@@ -75,19 +80,5 @@ public abstract class WebDtosAspect extends Aspect {
         return null;
     }
 
-    public MetaEntity metaSetup(){
-        MetaEntity meta = new MetaEntity();
-        meta.setUrl(httpServletRequest.getRequestURL().toString());
-        meta.setStart(new Date());
-        meta.setDestHost(httpServletRequest.getLocalAddr());
-        meta.setDestIp(httpServletRequest.getLocalAddr());
-        meta.setDestPort(httpServletRequest.getLocalPort()+"");
-        meta.setRequestType(MetaEntity.RequestType.valueOf(httpServletRequest.getMethod().toUpperCase()));
-        meta.setSourceHost(httpServletRequest.getRemoteHost());
-        meta.setSourceIp(httpServletRequest.getRemoteAddr());
-        meta.setSourcePort(httpServletRequest.getRemotePort()+"");
-        meta.setProxyString(MDC.get(MetaEntity.HEADER.PROXY_STRING_HEADER));
-        return meta;
-    }
 
 }

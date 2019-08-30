@@ -1,12 +1,17 @@
 package me.xethh.libs.extension.set.sst.core.FirstLayerFilter
 
+import me.xethh.libs.extension.set.core.AppMeta
 import me.xethh.libs.extension.set.core.EnableSETCore
+import me.xethh.libs.extension.set.core.RequestMeta
+import me.xethh.libs.extension.set.core.RequestMetaImpl
 import me.xethh.libs.extension.set.core.idProvider.IdProvider
 import me.xethh.libs.extension.set.sst.core.FirstLayerFilter.internalFilter.InternalFilter
 import me.xethh.libs.extension.set.sst.core.FirstLayerFilter.internalFilter.InternalFilterChain
 import me.xethh.libs.extension.set.sst.core.FirstLayerFilter.requestFilter.*
 import me.xethh.libs.toolkits.logging.WithLogger
 import me.xethh.libs.toolkits.webDto.core.MetaEntity
+import me.xethh.libs.toolkits.webDto.core.WebBaseEntity
+import org.apache.catalina.core.ApplicationContext
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,8 +19,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
+import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.filter.GenericFilterBean
 import java.lang.RuntimeException
 import javax.annotation.PostConstruct
@@ -59,6 +67,16 @@ class EnableFirstLayerFilterConfig : WithLogger{
         return FirstLayerFilter()
     }
 
+    @Bean
+    @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+    fun requestMeta(
+            @Autowired idProvider: IdProvider,
+            @Autowired httpServletRequest: HttpServletRequest
+    ):RequestMeta{
+        val id:String = httpServletRequest.getParameter(MetaEntity.HEADER.REQUEST_ID_HEADER)?:idProvider.gen()
+        return RequestMetaImpl(id, AppMeta.metaEntity(httpServletRequest))
+    }
+
 
     @PostConstruct
     fun init(){
@@ -74,7 +92,7 @@ class FirstLayerFilterConfigProperties{
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class FirstLayerFilter : GenericFilterBean(), WithLogger {
-    @Autowired lateinit var idProvider : IdProvider
+    @Autowired lateinit var requestMeta:RequestMeta
     @Autowired lateinit var sSTRequestURLVerifier:SSTRequestURLVerifier
     @Autowired lateinit var internalFilterChain: InternalFilterChain
 
@@ -84,21 +102,11 @@ class FirstLayerFilter : GenericFilterBean(), WithLogger {
             if(request is HttpServletRequest && response is HttpServletResponse && sSTRequestURLVerifier.verify(VerifyingRequest(request))){
                 logger.info("received request for SST")
                 logger.debug(VerifyingRequest(request))
-                requestInit(request, response)
                 val res = internalFilterChain.filter(request, response)
                 filterChain?.doFilter(res.first, res.second)
             }
             else
                 filterChain?.doFilter(request, response)
         }
-    }
-
-
-    fun requestInit(request: HttpServletRequest, response: ServletResponse?){
-        MDC.remove(MetaEntity.HEADER.REQUEST_ID_HEADER)
-        if(!StringUtils.isEmpty(request.getHeader(MetaEntity.HEADER.REQUEST_ID_HEADER)))
-            MDC.put(MetaEntity.HEADER.REQUEST_ID_HEADER, request.getHeader(MetaEntity.HEADER.REQUEST_ID_HEADER))
-        else
-            MDC.put(MetaEntity.HEADER.REQUEST_ID_HEADER, idProvider.gen())
     }
 }

@@ -12,7 +12,7 @@
 
   <groupId>me.xethh.libs.extension.set</groupId>
   <artifactId>core</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
 
   <name>core</name>
 
@@ -134,6 +134,18 @@
       <groupId>me.xethh.libs.toolkits</groupId>
       <artifactId>commons</artifactId>
       <version>1.7-RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>me.xethh.libs.toolkits.webDto</groupId>
+      <artifactId>core</artifactId>
+      <version>1.0.3</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <dependencyManagement>
