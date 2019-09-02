@@ -74,7 +74,7 @@ class EnableFirstLayerFilterConfig : WithLogger{
             @Autowired httpServletRequest: HttpServletRequest
     ):RequestMeta{
         val id:String = httpServletRequest.getParameter(MetaEntity.HEADER.REQUEST_ID_HEADER)?:idProvider.gen()
-        return RequestMetaImpl(id, AppMeta.metaEntity(httpServletRequest))
+        return RequestMetaImpl(httpServletRequest.getSession(true).id, id, AppMeta.metaEntity(httpServletRequest))
     }
 
 
