@@ -12,7 +12,7 @@
 
   <groupId>me.xethh.libs.extension.set.sst</groupId>
   <artifactId>core</artifactId>
-  <version>1.0.6</version>
+  <version>1.0.7</version>
 
   <name>sst</name>
 
@@ -99,7 +99,7 @@
     <dependency>
       <groupId>me.xethh.libs.toolkits</groupId>
       <artifactId>commons</artifactId>
-      <version>1.9-RELEASE</version>
+      <version>2.0.0</version>
     </dependency>
     <!-- Spring boot dependencies start-->
 
